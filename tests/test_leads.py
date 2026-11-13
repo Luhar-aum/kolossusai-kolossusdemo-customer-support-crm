@@ -2,12 +2,12 @@
 import pytest
 import os
 
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-os.environ["SYNC_DATABASE_URL"] = "sqlite:///:memory:"
-os.environ["SECRET_KEY"] = "test-secret-key-123"
-os.environ["REDIS_URL"] = "redis://localhost:6379/0"
-os.environ["CELERY_BROKER_URL"] = "redis://localhost:6379/1"
-os.environ["CELERY_RESULT_BACKEND"] = "redis://localhost:6379/2"
+os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test_leads.db")
+os.environ.setdefault("SYNC_DATABASE_URL", "sqlite:///./test_leads.db")
+os.environ.setdefault("SECRET_KEY", "test-secret-key-123")
+os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
+os.environ.setdefault("CELERY_BROKER_URL", "redis://localhost:6379/1")
+os.environ.setdefault("CELERY_RESULT_BACKEND", "redis://localhost:6379/2")
 
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
@@ -15,8 +15,8 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from app.main import app
 from app.core.database import Base, get_db
 
-TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
-test_engine = create_async_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
+TEST_DB_URL = "sqlite+aiosqlite:///./test_leads.db"
+test_engine = create_async_engine(TEST_DB_URL)
 TestSession = async_sessionmaker(test_engine, expire_on_commit=False)
 
 async def override_get_db():
@@ -32,9 +32,11 @@ async def setup_db():
     yield
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+    if os.path.exists("./test_leads.db"):
+        os.remove("./test_leads.db")
 
 async def _setup():
-    """Helper: register user and return (client, org_id, token)."""
+    """Helper: register user and return (client, org_id)."""
     client = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
     reg = await client.post("/api/v1/auth/register", json={
         "email": "user@test.com", "password": "pass123", "full_name": "Test User", "org_name": "Test Org"

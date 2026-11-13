@@ -2,26 +2,27 @@
 import pytest
 import os
 
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-os.environ["SYNC_DATABASE_URL"] = "sqlite:///:memory:"
-os.environ["SECRET_KEY"] = "test-secret-key-123"
-os.environ["REDIS_URL"] = "redis://localhost:6379/0"
-os.environ["CELERY_BROKER_URL"] = "redis://localhost:6379/1"
-os.environ["CELERY_RESULT_BACKEND"] = "redis://localhost:6379/2"
+os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test_crm.db")
+os.environ.setdefault("SYNC_DATABASE_URL", "sqlite:///./test_crm.db")
+os.environ.setdefault("SECRET_KEY", "test-secret-key-123")
+os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
+os.environ.setdefault("CELERY_BROKER_URL", "redis://localhost:6379/1")
+os.environ.setdefault("CELERY_RESULT_BACKEND", "redis://localhost:6379/2")
 
+import asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from app.main import app
 from app.core.database import Base, get_db
 
-TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
-test_engine = create_async_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
-TestSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
+TEST_DB_URL = "sqlite+aiosqlite:///./test_crm.db"
+test_engine = create_async_engine(TEST_DB_URL)
+TestSession = async_sessionmaker(test_engine, expire_on_commit=False)
 
 async def override_get_db():
-    async with TestSessionLocal() as session:
-        yield session
+    async with TestSession() as s:
+        yield s
 
 app.dependency_overrides[get_db] = override_get_db
 
@@ -32,9 +33,9 @@ async def setup_db():
     yield
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-
-async def _make_client():
-    return AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
+    # Clean up file
+    if os.path.exists("./test_crm.db"):
+        os.remove("./test_crm.db")
 
 async def test_register_and_login():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
