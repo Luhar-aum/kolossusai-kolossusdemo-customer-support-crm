@@ -1,4 +1,4 @@
-from sqlalchemy import String, Boolean, ForeignKey, Enum as SAEnum, Column
+from sqlalchemy import String, Boolean, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from typing import Optional, List
 from app.core.database import Base
@@ -24,12 +24,8 @@ class OrganizationMember(Base, UUIDMixin, TimestampMixin):
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
     role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), default=UserRole.sales_rep)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    invited_by: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    # Store invited_by as a plain string to avoid ambiguous FK to users
+    invited_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     organization: Mapped["Organization"] = relationship("Organization", back_populates="members")
-    user: Mapped["User"] = relationship(
-        "User",
-        back_populates="memberships",
-        primaryjoin="OrganizationMember.user_id == User.id",
-        foreign_keys="[OrganizationMember.user_id]",
-    )
+    user: Mapped["User"] = relationship("User", back_populates="memberships")
