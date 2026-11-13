@@ -1,5 +1,5 @@
-from sqlalchemy import String, Integer, Float, ForeignKey, Enum as SAEnum, Text, DateTime
-from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy import String, Integer, Float, ForeignKey, Text, DateTime
+from sqlalchemy.orm import mapped_column, Mapped
 from typing import Optional
 import enum
 from app.core.database import Base
@@ -28,7 +28,7 @@ class Deal(Base, UUIDMixin, TimestampMixin):
     currency: Mapped[str] = mapped_column(String(10), default="USD")
     probability: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     expected_close_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    stage: Mapped[DealStage] = mapped_column(SAEnum(DealStage), default=DealStage.new, index=True)
+    stage: Mapped[str] = mapped_column(String(50), default="new", index=True)
     assigned_to: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"), nullable=True)
     products: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

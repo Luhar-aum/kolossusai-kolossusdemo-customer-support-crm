@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey, Enum as SAEnum, Text, DateTime
+from sqlalchemy import String, ForeignKey, Text, DateTime
 from sqlalchemy.orm import mapped_column, Mapped
 from typing import Optional
 import enum
@@ -29,8 +29,8 @@ class Task(Base, UUIDMixin, TimestampMixin):
     lead_id: Mapped[Optional[str]] = mapped_column(ForeignKey("leads.id"), nullable=True)
     deal_id: Mapped[Optional[str]] = mapped_column(ForeignKey("deals.id"), nullable=True)
     due_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    priority: Mapped[TaskPriority] = mapped_column(SAEnum(TaskPriority), default=TaskPriority.medium)
-    status: Mapped[TaskStatus] = mapped_column(SAEnum(TaskStatus), default=TaskStatus.todo, index=True)
+    priority: Mapped[str] = mapped_column(String(50), default="medium")
+    status: Mapped[str] = mapped_column(String(50), default="todo", index=True)
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     is_deleted: Mapped[bool] = mapped_column(default=False)
 

@@ -22,9 +22,8 @@ class OrganizationMember(Base, UUIDMixin, TimestampMixin):
 
     organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id"), index=True)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
-    role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), default=UserRole.sales_rep)
+    role: Mapped[str] = mapped_column(String(50), default="sales_rep")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    # Store invited_by as a plain string to avoid ambiguous FK to users
     invited_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     organization: Mapped["Organization"] = relationship("Organization", back_populates="members")

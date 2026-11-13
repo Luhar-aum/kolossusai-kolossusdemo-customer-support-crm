@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey, Enum as SAEnum, Text, Boolean, Integer, JSON
+from sqlalchemy import String, ForeignKey, Text, Boolean, Integer
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from typing import Optional, List
 import enum
@@ -26,7 +26,7 @@ class Workflow(Base, UUIDMixin, TimestampMixin):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     trigger_type: Mapped[str] = mapped_column(String(100))
     trigger_config: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    status: Mapped[WorkflowStatus] = mapped_column(SAEnum(WorkflowStatus), default=WorkflowStatus.draft)
+    status: Mapped[str] = mapped_column(String(50), default="draft")
     created_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
 
     steps: Mapped[List["WorkflowStep"]] = relationship("WorkflowStep", back_populates="workflow", order_by="WorkflowStep.order")
@@ -50,7 +50,7 @@ class WorkflowExecution(Base, UUIDMixin, TimestampMixin):
 
     workflow_id: Mapped[str] = mapped_column(ForeignKey("workflows.id"), index=True)
     organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id"), index=True)
-    status: Mapped[ExecutionStatus] = mapped_column(SAEnum(ExecutionStatus), default=ExecutionStatus.pending)
+    status: Mapped[str] = mapped_column(String(50), default="pending")
     trigger_data: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     execution_log: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

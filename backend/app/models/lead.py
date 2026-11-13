@@ -1,4 +1,4 @@
-from sqlalchemy import String, Integer, Float, ForeignKey, Enum as SAEnum, Text, DateTime
+from sqlalchemy import String, Integer, Float, ForeignKey, Text, DateTime
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from typing import Optional, List
 import enum
@@ -44,11 +44,11 @@ class Lead(Base, UUIDMixin, TimestampMixin):
     job_title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     industry: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     country: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    source: Mapped[LeadSource] = mapped_column(SAEnum(LeadSource), default=LeadSource.manual)
-    status: Mapped[LeadStatus] = mapped_column(SAEnum(LeadStatus), default=LeadStatus.new, index=True)
-    priority: Mapped[LeadPriority] = mapped_column(SAEnum(LeadPriority), default=LeadPriority.medium)
+    source: Mapped[str] = mapped_column(String(50), default="manual")
+    status: Mapped[str] = mapped_column(String(50), default="new", index=True)
+    priority: Mapped[str] = mapped_column(String(50), default="medium")
     lead_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    classification: Mapped[Optional[LeadClassification]] = mapped_column(SAEnum(LeadClassification), nullable=True)
+    classification: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     assigned_to: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"), nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     last_activity_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

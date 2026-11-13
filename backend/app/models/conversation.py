@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey, Enum as SAEnum, Text, Boolean, JSON
+from sqlalchemy import String, ForeignKey, Text, Boolean
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from typing import Optional, List
 import enum
@@ -30,11 +30,11 @@ class Conversation(Base, UUIDMixin, TimestampMixin):
     lead_id: Mapped[Optional[str]] = mapped_column(ForeignKey("leads.id"), nullable=True)
     contact_id: Mapped[Optional[str]] = mapped_column(ForeignKey("contacts.id"), nullable=True)
     subject: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    channel: Mapped[ConversationChannel] = mapped_column(SAEnum(ConversationChannel), default=ConversationChannel.email)
-    status: Mapped[ConversationStatus] = mapped_column(SAEnum(ConversationStatus), default=ConversationStatus.open)
+    channel: Mapped[str] = mapped_column(String(50), default="email")
+    status: Mapped[str] = mapped_column(String(50), default="open")
     assigned_to: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"), nullable=True)
     ai_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    sentiment: Mapped[Optional[MessageSentiment]] = mapped_column(SAEnum(MessageSentiment), nullable=True)
+    sentiment: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     priority: Mapped[str] = mapped_column(String(20), default="medium")
     tags: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     is_deleted: Mapped[bool] = mapped_column(default=False)
@@ -54,6 +54,6 @@ class Message(Base, UUIDMixin, TimestampMixin):
     is_approved: Mapped[bool] = mapped_column(Boolean, default=True)
     approved_by: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"), nullable=True)
     is_sent: Mapped[bool] = mapped_column(Boolean, default=False)
-    sentiment: Mapped[Optional[MessageSentiment]] = mapped_column(SAEnum(MessageSentiment), nullable=True)
+    sentiment: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
     conversation: Mapped["Conversation"] = relationship("Conversation", back_populates="messages")
