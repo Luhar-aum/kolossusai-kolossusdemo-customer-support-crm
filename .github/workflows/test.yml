@@ -14,11 +14,11 @@ jobs:
         run: |
           cd backend
           pip install -r requirements.txt
-          pip install aiosqlite pytest-asyncio
+          pip install aiosqlite
       - name: Run tests
         run: |
-          cd backend
-          DATABASE_URL=sqlite+aiosqlite:///:memory: SYNC_DATABASE_URL=sqlite:///:memory: SECRET_KEY=test-secret REDIS_URL=redis://localhost:6379/0 CELERY_BROKER_URL=redis://localhost:6379/1 CELERY_RESULT_BACKEND=redis://localhost:6379/2 python -m pytest ../tests/ -v --tb=short
+          DATABASE_URL=sqlite+aiosqlite:///:memory: SYNC_DATABASE_URL=sqlite:///:memory: SECRET_KEY=test-secret REDIS_URL=redis://localhost:6379/0 CELERY_BROKER_URL=redis://localhost:6379/1 CELERY_RESULT_BACKEND=redis://localhost:6379/2 python -m pytest tests/ -v --tb=short --asyncio-mode=auto
+        working-directory: .
 
   frontend:
     runs-on: ubuntu-latest

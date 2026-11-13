@@ -1,8 +1,6 @@
 """Tests for lead management."""
 import pytest
 import os
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("SYNC_DATABASE_URL", "sqlite:///:memory:")
@@ -10,6 +8,9 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key-123")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
 os.environ.setdefault("CELERY_BROKER_URL", "redis://localhost:6379/1")
 os.environ.setdefault("CELERY_RESULT_BACKEND", "redis://localhost:6379/2")
+
+from httpx import AsyncClient, ASGITransport
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from app.main import app
 from app.core.database import Base, get_db
@@ -45,7 +46,6 @@ async def auth_client():
         ac.org_id = org_id  # type: ignore
         yield ac
 
-@pytest.mark.asyncio
 async def test_create_lead(auth_client):
     res = await auth_client.post("/api/v1/leads", json={
         "name": "John Doe", "email": "john@acme.com", "company": "Acme",
@@ -56,14 +56,12 @@ async def test_create_lead(auth_client):
     assert data["name"] == "John Doe"
     assert data["status"] == "new"
 
-@pytest.mark.asyncio
 async def test_duplicate_email_rejected(auth_client):
     payload = {"name": "Lead1", "email": "dup@test.com", "organization_id": auth_client.org_id}  # type: ignore
     await auth_client.post("/api/v1/leads", json=payload)
     res = await auth_client.post("/api/v1/leads", json=payload)
     assert res.status_code == 409
 
-@pytest.mark.asyncio
 async def test_list_leads_pagination(auth_client):
     for i in range(5):
         await auth_client.post("/api/v1/leads", json={"name": f"Lead{i}", "organization_id": auth_client.org_id})  # type: ignore
@@ -73,7 +71,6 @@ async def test_list_leads_pagination(auth_client):
     assert data["total"] == 5
     assert len(data["data"]) == 3
 
-@pytest.mark.asyncio
 async def test_update_lead(auth_client):
     create = await auth_client.post("/api/v1/leads", json={"name": "Lead", "organization_id": auth_client.org_id})  # type: ignore
     lead_id = create.json()["id"]
@@ -81,7 +78,6 @@ async def test_update_lead(auth_client):
     assert update.status_code == 200
     assert update.json()["status"] == "contacted"
 
-@pytest.mark.asyncio
 async def test_soft_delete(auth_client):
     create = await auth_client.post("/api/v1/leads", json={"name": "ToDelete", "organization_id": auth_client.org_id})  # type: ignore
     lead_id = create.json()["id"]
@@ -90,7 +86,6 @@ async def test_soft_delete(auth_client):
     get_res = await auth_client.get(f"/api/v1/leads/{lead_id}")
     assert get_res.status_code == 404
 
-@pytest.mark.asyncio
 async def test_search_leads(auth_client):
     await auth_client.post("/api/v1/leads", json={"name": "Alice Smith", "email": "alice@acme.com", "organization_id": auth_client.org_id})  # type: ignore
     await auth_client.post("/api/v1/leads", json={"name": "Bob Jones", "organization_id": auth_client.org_id})  # type: ignore
