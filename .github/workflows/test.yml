@@ -17,8 +17,8 @@ jobs:
           pip install aiosqlite
       - name: Run tests
         run: |
-          DATABASE_URL=sqlite+aiosqlite:///:memory: SYNC_DATABASE_URL=sqlite:///:memory: SECRET_KEY=test-secret REDIS_URL=redis://localhost:6379/0 CELERY_BROKER_URL=redis://localhost:6379/1 CELERY_RESULT_BACKEND=redis://localhost:6379/2 python -m pytest tests/ -v --tb=short --asyncio-mode=auto
-        working-directory: .
+          cd backend
+          DATABASE_URL=sqlite+aiosqlite:///:memory: SYNC_DATABASE_URL=sqlite:///:memory: SECRET_KEY=test-secret REDIS_URL=redis://localhost:6379/0 CELERY_BROKER_URL=redis://localhost:6379/1 CELERY_RESULT_BACKEND=redis://localhost:6379/2 python -m pytest ../tests/ -v --tb=short --asyncio-mode=auto
 
   frontend:
     runs-on: ubuntu-latest
