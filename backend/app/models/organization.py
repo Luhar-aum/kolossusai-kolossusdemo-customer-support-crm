@@ -1,4 +1,4 @@
-from sqlalchemy import String, Boolean, ForeignKey, Enum as SAEnum
+from sqlalchemy import String, Boolean, ForeignKey, Enum as SAEnum, Column
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from typing import Optional, List
 from app.core.database import Base
@@ -27,4 +27,9 @@ class OrganizationMember(Base, UUIDMixin, TimestampMixin):
     invited_by: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"), nullable=True)
 
     organization: Mapped["Organization"] = relationship("Organization", back_populates="members")
-    user: Mapped["User"] = relationship("User", back_populates="memberships", foreign_keys="[OrganizationMember.user_id]")
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="memberships",
+        primaryjoin="OrganizationMember.user_id == User.id",
+        foreign_keys="[OrganizationMember.user_id]",
+    )
