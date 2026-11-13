@@ -27,4 +27,4 @@ class OrganizationMember(Base, UUIDMixin, TimestampMixin):
     invited_by: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"), nullable=True)
 
     organization: Mapped["Organization"] = relationship("Organization", back_populates="members")
-    user: Mapped["User"] = relationship("User", back_populates="memberships", foreign_keys=[user_id])
+    user: Mapped["User"] = relationship("User", back_populates="memberships", foreign_keys="[OrganizationMember.user_id]")
