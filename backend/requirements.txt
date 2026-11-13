@@ -25,3 +25,4 @@ httpx==0.27.0
 aiofiles==23.2.1
 python-slugify==8.0.4
 aiosqlite==0.20.0
+# trigger
